@@ -1,0 +1,74 @@
+Vantagens de transformar uma class em um EJB
+- Controle de transação
+- Integração com JPA
+- Escopo e ciclo de vida
+- Agendamento de processos
+- Controle de concorrêcia(Singletons)
+- Chamadas Assíncronas
+- Portabilidade entre servers de aplicação
+
+Personalizando as mensagens
+ValidationMessages.properties file que  o Hibernate Validator usa p mostrar mensagens amigáveis ao user, dentro de resources
+binding da msg e atributo é feito na annotation do attr
+		@NotBlank(message = "{agendamentoEmail.email.vazio}")
+		
+Gerando o log da aplicação
+1- Criar uma annotation @Logger e colocar na class que deseja
+2- Criar class que ficará responsavel por inteceptar as chamadas aos métodos
+3- Declarar interceptor no beans.xml
+
+
+Usando o EJB Timer
+Serviço que rodará de tempos em tempos verificando o BD a fim de enviar os emails.
+https://www.devmedia.com.br/java-ee-como-usar-o-design-pattern-timer-service/33000 exemplos de expressões a serem usadas no @Schedule
+
+Email fake: mailTrap.io
+
+Comandos p config JavaMail:
+C:\Users\dougl\Desktop\Ferramentas de Desenvolvimento\Servers\wildfly-14.0.0.Final\bin>jboss-cli.bat --connect
+/subsystem=mail/mail-session=agendamentoMailSession:add(jndi-name=java:jboss/mail/AgendamentoMailSession)
+/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=my-smtp-binding:add(host=smtp.mailtrap.io, port=2525)
+/subsystem=mail/mail-session=agendamentoMailSession/server=smtp:add(outbound-socket-binding-ref= my-smtp-binding, username=7dcd4c728fc21e, password=2c43ad244790f5, tls=true)
+
+No WildFly 14 o envio de emails funcionou
+
+Java Message Service(JMS)
+JNDI é utilizado para referenciar recursos dentro do contexto Java EE.
+Fila JMS só permite o envio de entidade seriálizaveis
+
+C:\Users\dougl\Desktop\Ferramentas de Desenvolvimento\Servers\wildfly-14.0.0.Final\bin>jboss-cli.bat --connect
+jms-queue add --queue-address=EmailQueue --entries=java:/jms/queue/EmailQueue -> criando fila
+
+jms-queue list-messages --queue-address=EmailQueue -> verificando se há emails na fila
+
+Consumindo mensagens da fila p enviar email: Message Driven Bean
+/subsystem=messaging-activemq/server=default/jms-queue=EmailQueue:list-messages
+/subsystem=messaging-activemq/server=default/jms-queue=DLQ:list-messages -> ver emails que deram errado
+
+ Gerenciamento de transações do EJB (JTA (Java Transaction API))
+ CMT- Container Management Transaction - programador nao precisa se preocupar com commit nem rollback
+ BMT- Bean Managed Transaction- programador controla tudo
+ TransactionManagement.BEAN
+ TransactionManagement.CONTAINER na class
+ 
+TransactionAttribute(NOT_SUPPORTED) - definindo o escopo da transação, nesse caso não tem escopo(sem transação, ainda que lancemos uma Runtime, não desfaz a transação, afinal não tem)
+TransactionAttribute(REQUIRED) - na chamada do method, caso não tenha transação ele cria
+@TransactionAttribute(TransactionAttributeType.REQUIRED_NEW) - para abrir uma nova transação toda vez que o método é chamado.
+
+AplicationException - Checked (Exception)- não causa rollback
+SystemException - UnChecked (RuntimeException) - causa rollback
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
