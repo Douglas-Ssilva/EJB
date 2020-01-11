@@ -1,0 +1,102 @@
+============================EJB============================
+
+Adotando um Servidor de Aplicações que implemente as especificações da arquitetura Java Enterprise Edition (JEE). A tarefa de um servidor de aplicações é justamente livrar o 
+desenvolvedor dessas preocupações e fornecer uma infra-estrutura pronta para que o desenvolvedor possa aproveitar. Ou seja, não é a aplicação que vai gerenciar a transação, a
+ conexão com o banco de dados ou se preocupar com o agendamento de tarefas. Vamos inverter o controle e deixar o servidor de aplicação fazer toda essa parte.
+
+Utilizando a arquitetura EJB, as regras de negócio são implementadas em componentes específicos que são chamados de Session Beans. 
+O EJB Container administra esses componentes oferecendo diversos recursos a eles.
+
+Do Stateless Session Bean é o primeiro tipo de Session Bean. Os Stateless Session Bean não mantém estado de conversação com o cliente, não têm compromisso de manter uma sessão, são intercambiáveis e 
+podem ser alocados de um pool e são EJBs econômicos;
+
+Quando o server sobe, o EJB container acha a annotation e registra o EBJ no registro JNDI. Server usa esse registro p organizar os componentes que ele administra.
+
+Um sessionBean é automaticamente ThreadSafe, isto é, o container EJB cria umainstancia da classe p cada request
+Tag pools no standalone mostra quantos objetos o container ebj cria.
+
+Significa que um EJB Session Bean não é compartilhado entre Threads. Ou seja, quando um Session Bean estiver em uso, o EJB Container decide criar mais 
+um Session Bean para atender uma nova chamada. Uma estratégia usada pelos servidores de aplicação para isso é o Pooling for Stateless Session EJBs.
+
+Singleton Session Bean Ele garante que haverá somente uma instância do Session Bean.
+Um Session Bean Stateful (SBSF) também é um objeto administrado pelo EJB Container. Assim ele ganha os serviços oferecidos pelo Container como injeção de
+ dependências, transação ou JPA (como veremos mais para frente).
+
+Qual é a diferença entre Stateful e Stateless então?
+
+Vimos que Session Beans Stateless são objetos que fazem parte de um pool. Esse pool não existe para Session Bean Stateful. Um SBSF funciona parecido 
+com o objeto HttpSession do mundo de Servlets. É um objeto exclusivo de um cliente, apenas um cliente usará este objeto.
+
+Podemos imaginar que um Session Bean Stateful funciona como um carrinho de compras. Cada cliente possui o seu carrinho e ele utilizará o mesmo 
+carrinho o tempo todo. Não queremos compartilhar esse carrinho com ninguém (as compras são nossas). Um Session Bean Stateful garante esse comportamento.
+
+No entanto, no dia a dia os SBSF são pouco usados. Isto porque normalmente se usa o objeto HttpSession para guardar dados do cliente 
+(como o carrinho de compras ou as permissões do usuário). Como já usamos esse objeto dentro do servlet container não é preciso repetir essas informações 
+através do EJB Container. Assim muitos arquitetos preferem usar apenas Stateless/Singleton em conjunto com o HttpSession.
+
+EJB container automaticamente abre e consolida a transação, assim nao precisamos de dar begin e rollback na transação.
+
+JTA java Transaction API- é o coordenador de transação do servidor de aplicação.
+Funciona sem nenhuma configuração. Chama-se CMT(Container Managed Transaction)
+@TransactionManagement(TransactionManagementType.CONTAINER) default: deixando a intenção explicita e será iniciada pelo container. Na class
+
+@TransactionAttribute(TransactionAttributeType.REQUIRED)- default
+	JTA garante uma transação quando o metodo é chamado, se nao tiver, ele cria uma nova transação
+
+@TransactionAttribute(TransactionAttributeType.MANDATORY)
+	Verifica se existe uma transação, senão lança uma exception(EJBRequiredTransaction)
+
+@TransactionAttribute(TransactionAttributeType.REQUIRED_NEW)
+	Sempre deve haver uma transaction em execução, caso existe, essa será suspensa p abrir uma nova, caso nao tenha será criada
+	
+@TransactionAttribute(TransactionAttributeType.NEVER)
+	Jamais deve haver uma transaction rodando.
+	
+Como os Beans não são sessions beans, não tem condições de criar uma transaction, assim criaremos um package service, que será o responsavel 
+por abrir a transaction, visto que não é uma boa prática abrir transaction no DAO.
+
+Service(Controlador da regra de negocio)	
+Bean(Muita coisa do JSF)
+DAO(codigo de infra)
+
+Utilizando tanto o atributo REQUIRED quanto REQUIRES_NEW, o JTA garante uma transação rodando quando o método é chamado. Porém, a principal 
+diferença está no fato de que, utilizando o atributo REQUIRED, caso já tenha uma transação rodando, ela será utilizada. Já no caso do atributo 
+REQUIRES_NEW, caso já exista uma transação rodando, a transação atual será suspensa para abrir uma nova.
+
+NotSupported
+Significa que o método sempre será executado fora de uma transação. Se o cliente estiver dentro de uma transação, essa é suspensa até que o método 
+execute seu código e retorne. Como o código é executado fora de uma transação, ele não afeta a transação que já estava aberta. Se o cliente não estiver 
+no escopo de uma transação, o método será executado normalmente sem criar nenhuma transação.
+
+Supports
+Significa que o método será executado dentro ou fora de uma transação, dependendo do cliente. Se o cliente chamar o método fora de uma transação, nenhuma 
+será criada e o método será executado fora de uma transação. Se o cliente chamar dentro de uma transação, o método será executado dentro dessa mesma transação.
+
+Devemos sempre nos atentar ao fato que, caso abramos uma nova transaction com o required_new, persistamos o dado, e voltando p transaction anterior
+ocorra alguma exception, nao será desfeito rollback, pois foi feito em uma nova transaction
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Lindando com Exceptions
+
+
+
+
