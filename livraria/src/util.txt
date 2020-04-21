@@ -10,6 +10,8 @@ O EJB Container administra esses componentes oferecendo diversos recursos a eles
 Do Stateless Session Bean é o primeiro tipo de Session Bean. Os Stateless Session Bean não mantém estado de conversação com o cliente, não têm compromisso de manter uma sessão, são intercambiáveis e 
 podem ser alocados de um pool e são EJBs econômicos;
 
+Ao usarmos os resources do EJB container e usarmos as class como atributos, temos que pedir o EJB pra injetar com um objeto daquele tipo.
+
 Quando o server sobe, o EJB container acha a annotation e registra o EBJ no registro JNDI. Server usa esse registro p organizar os componentes que ele administra.
 
 Um sessionBean é automaticamente ThreadSafe, isto é, o container EJB cria umainstancia da classe p cada request
@@ -44,13 +46,22 @@ Funciona sem nenhuma configuração. Chama-se CMT(Container Managed Transaction)
 	JTA garante uma transação quando o metodo é chamado, se nao tiver, ele cria uma nova transação
 
 @TransactionAttribute(TransactionAttributeType.MANDATORY)
-	Verifica se existe uma transação, senão lança uma exception(EJBRequiredTransaction)
+	Verifica se existe uma transação, senão lança uma exception(EJBRequiredTransaction), quem faz a chamada deve abrir uma transação
 
 @TransactionAttribute(TransactionAttributeType.REQUIRED_NEW)
 	Sempre deve haver uma transaction em execução, caso existe, essa será suspensa p abrir uma nova, caso nao tenha será criada
 	
 @TransactionAttribute(TransactionAttributeType.NEVER)
-	Jamais deve haver uma transaction rodando.
+	Jamais deve haver uma transaction rodando. Útil p métodos sem contexto transacional
+	
+NotSupported
+Significa que o método sempre será executado fora de uma transação. Se o cliente estiver dentro de uma transação, essa é suspensa até que o método 
+execute seu código e retorne. Como o código é executado fora de uma transação, ele não afeta a transação que já estava aberta. Se o cliente não estiver 
+no escopo de uma transação, o método será executado normalmente sem criar nenhuma transação.
+
+Supports
+Significa que o método será executado dentro ou fora de uma transação, dependendo do cliente. Se o cliente chamar o método fora de uma transação, nenhuma 
+será criada e o método será executado fora de uma transação. Se o cliente chamar dentro de uma transação, o método será executado dentro dessa mesma transação.
 	
 Como os Beans não são sessions beans, não tem condições de criar uma transaction, assim criaremos um package service, que será o responsavel 
 por abrir a transaction, visto que não é uma boa prática abrir transaction no DAO.
@@ -63,40 +74,15 @@ Utilizando tanto o atributo REQUIRED quanto REQUIRES_NEW, o JTA garante uma tran
 diferença está no fato de que, utilizando o atributo REQUIRED, caso já tenha uma transação rodando, ela será utilizada. Já no caso do atributo 
 REQUIRES_NEW, caso já exista uma transação rodando, a transação atual será suspensa para abrir uma nova.
 
-NotSupported
-Significa que o método sempre será executado fora de uma transação. Se o cliente estiver dentro de uma transação, essa é suspensa até que o método 
-execute seu código e retorne. Como o código é executado fora de uma transação, ele não afeta a transação que já estava aberta. Se o cliente não estiver 
-no escopo de uma transação, o método será executado normalmente sem criar nenhuma transação.
-
-Supports
-Significa que o método será executado dentro ou fora de uma transação, dependendo do cliente. Se o cliente chamar o método fora de uma transação, nenhuma 
-será criada e o método será executado fora de uma transação. Se o cliente chamar dentro de uma transação, o método será executado dentro dessa mesma transação.
-
 Devemos sempre nos atentar ao fato que, caso abramos uma nova transaction com o required_new, persistamos o dado, e voltando p transaction anterior
 ocorra alguma exception, nao será desfeito rollback, pois foi feito em uma nova transaction
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 Lindando com Exceptions
+Exception checked - não gera rollback (Exception, AplicationException ), pode acontecer durante a vida da aplicação relacionada ao dominio
+Exception unchecked - gera rollback (RuntimeException, System Exception), algo mais grave do sistema
 
+O código do interceptador é executado antes do código do serviço. Contanto que a annotation esteja no service.
 
 
 

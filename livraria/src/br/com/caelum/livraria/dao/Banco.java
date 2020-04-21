@@ -11,13 +11,13 @@ import br.com.caelum.livraria.modelo.Autor;
 import br.com.caelum.livraria.modelo.Livro;
 import br.com.caelum.livraria.modelo.Usuario;
 
-@Singleton //Queremos apenas uma instancia dessa classe. Inicializa alguma config ou serviço
+@Singleton //Queremos apenas uma instancia dessa classe. Inicializa alguma config ou agenda serviço
 @Startup   //Use essa classe desde o inicio da aplicação. Por default o ejb é carregado sobre demanda(Eager Inicialization)
 public class Banco {
 	
-	public static List<Livro> livros = new ArrayList<Livro>();
-	public static List<Autor> autores = new ArrayList<Autor>();
-	public static List<Usuario> usuarios = new ArrayList<Usuario>();
+	public static List<Livro> livros = new ArrayList<>();
+	public static List<Autor> autores = new ArrayList<>();
+	public static List<Usuario> usuarios = new ArrayList<>();
 	
 	private static int chave = 1;
 	

@@ -18,8 +18,9 @@ public class AutorService {
 	
 	//Abrirá uma transação visto que o padrão é required
 	public void add(Autor autor) {
+		System.out.println("Autor Service");
 		autorDao.salva(autor);
-		throw new RuntimeException();
+//		throw new RuntimeException();
 	}
 
 	@TransactionAttribute(TransactionAttributeType.NEVER)

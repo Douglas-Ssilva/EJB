@@ -21,7 +21,7 @@
 				
 			    <f:facet name="footer">  
 					<p:commandButton value="Salvar" action="#{autorBean.cadastra}" 
-							process="@form" update="@form :mensagens"  />
+							process="nome" update="autores :mensagens"  />
 				</f:facet>
 			</p:panelGrid>
 				
@@ -34,7 +34,9 @@
 			</p:dataList>
 		
 		</h:form>
-	
+	<h:outputScript library="primefaces" name="jquery/jquery.js" target="head"/>
+	<h:outputScript>
+	</h:outputScript>
 	</ui:define>
 </ui:composition>
 	
