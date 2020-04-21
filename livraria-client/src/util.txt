@@ -1,0 +1,1 @@
+Para consumir serviços, basta criar o projeto, dar bt direito nele, criar novo web service client e finish.
